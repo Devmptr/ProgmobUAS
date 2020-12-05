@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">UASProgmob</string>
+    <string name="app_login">Login</string>
+
+    <string name="hint_username">Username</string>
+    <string name="hint_password">Password</string>
+
+    <string name="text_bayar">Bayar</string>
+
+    <string name="pilih_jenis">Pilih Jenis</string>
+    <string name="jenis_iuran">Jenis Iuran</string>
+
+    <string-array name="list_jenis_iuran">
+        <item>Iuran Air</item>
+        <item>Iuran Sampah</item>
+        <item>Semua Iuran</item>
+    </string-array>
+</resources>
