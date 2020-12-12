@@ -82,4 +82,5 @@ public class SearchActivity extends AppCompatActivity {
         rvLapak.setAdapter(adapter);
         rvLapak.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
     }
+
 }

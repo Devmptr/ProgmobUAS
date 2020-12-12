@@ -4,46 +4,161 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.devmptr.uasprogmob.adapter.LapakAdapter;
 import com.devmptr.uasprogmob.model.KategoriIuranModel;
 import com.devmptr.uasprogmob.network.Client;
 import com.devmptr.uasprogmob.network.response.KategoriIuranResponse;
 import com.devmptr.uasprogmob.network.response.LapakResponse;
+import com.devmptr.uasprogmob.network.service.BayarIuran;
 import com.devmptr.uasprogmob.network.service.KategoriIuranService;
 import com.devmptr.uasprogmob.network.service.LapakService;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PembayaranActivity extends AppCompatActivity {
     Spinner spinner;
+    EditText tanggal_iuran, periode_iuran;
     List<String> listKategoriIuran;
     ArrayAdapter<String> adapter;
-
+    Button btn_submit;
+    int id_lapak, id_iuran;
+    String tanggal_bayar, formatted_tanggal_iuran;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pembayaran);
 
         spinner = (Spinner) findViewById(R.id.listJenisIuran);
+        tanggal_iuran = findViewById(R.id.tanggalIuran);
+        periode_iuran = findViewById(R.id.periodeIuran);
+        btn_submit = findViewById(R.id.btn_submit_pembayaran);
+        receiveData();
         listKategoriIuran = new ArrayList<String>();
-
+        getKategoriIuran();
+        tanggal_bayar = datenow();
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, listKategoriIuran);
         spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String selectedName = adapterView.getItemAtPosition(i).toString();
+                requestDataKategori(selectedName);
+                Toast.makeText(getApplicationContext(), "Kamu memilih " + selectedName, Toast.LENGTH_SHORT).show();
+            }
 
-        getKategoriIuran();
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+        btn_submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                formatted_tanggal_iuran = format_iuran(tanggal_iuran.getText().toString());
+                BayarIuran service = Client.getClient().create(BayarIuran.class);
+                service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,Integer.parseInt(periode_iuran.getText().toString()),id_iuran)
+                        .enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if(response.isSuccessful()){
+                                    Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Log.e("Response errorBody", String.valueOf(response.code()));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                            }
+                        });
+            }
+        });
+    }
+
+    private String format_iuran(String tanggal) {
+        try {
+
+            SimpleDateFormat curFormater = new SimpleDateFormat("ddMMyyyy");
+            Date dateObj = curFormater.parse(tanggal);
+            SimpleDateFormat postFormater = new SimpleDateFormat("yyyy-MM-dd");
+            String newDateStr = postFormater.format(dateObj);
+            return newDateStr;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+        return tanggal;
+    }
+
+    private void receiveData() {
+        Intent intent = getIntent();
+        if(intent.getExtras() !=null){
+            int int_id_lapak = intent.getIntExtra("lapak_id",0);
+            this.id_lapak = int_id_lapak;
+        }
+    }
+
+    private String datenow() {
+        Date c = Calendar.getInstance().getTime();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String formattedDate = df.format(c);
+        return formattedDate;
+    }
+
+    private void requestDataKategori(String selectedName) {
+        KategoriIuranService service = Client.getClient().create(KategoriIuranService.class);
+        service.getDataKategori(selectedName).enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()){
+                    try {
+                        JSONObject jsonRESULTS = new JSONObject(response.body().string());
+                        id_iuran = jsonRESULTS.getInt("id_kategori_iuran");
+                        Toast.makeText(getApplicationContext(), "id iuran adalah "+id_iuran, Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e){
+                        e.printStackTrace();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                }else{
+                    Log.e("Response errorBody", String.valueOf(response.errorBody()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 
     public void getKategoriIuran(){

@@ -27,6 +27,8 @@ public class LapakAdapter extends RecyclerView.Adapter<LapakAdapter.ViewHolder> 
         modelLapak = lapak;
     }
 
+
+
     @NonNull
     @Override
     public LapakAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -51,7 +53,7 @@ public class LapakAdapter extends RecyclerView.Adapter<LapakAdapter.ViewHolder> 
             public void onClick(View view) {
                 Toast.makeText(view.getContext(), "Id = "+lapak.getId(),
                         Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(context, PembayaranActivity.class);
+                Intent intent = new Intent(context, PembayaranActivity.class).putExtra("lapak_id",lapak.getId());
                 context.startActivity(intent);
             }
         });
