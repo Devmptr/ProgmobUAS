@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -48,12 +49,13 @@ public class PembayaranActivity extends AppCompatActivity {
     ArrayAdapter<String> adapter;
     Button btn_submit;
     int id_lapak, id_iuran;
+    SharedPreferences sPSettings;
     String tanggal_bayar, formatted_tanggal_iuran;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pembayaran);
-
+        sPSettings = getSharedPreferences("IuranAdmin", getApplicationContext().MODE_PRIVATE);
         spinner = (Spinner) findViewById(R.id.listJenisIuran);
         tanggal_iuran = findViewById(R.id.tanggalIuran);
         periode_iuran = findViewById(R.id.periodeIuran);
@@ -83,23 +85,29 @@ public class PembayaranActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 formatted_tanggal_iuran = format_iuran(tanggal_iuran.getText().toString());
-                BayarIuran service = Client.getClient().create(BayarIuran.class);
-                service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,Integer.parseInt(periode_iuran.getText().toString()),id_iuran)
-                        .enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if(response.isSuccessful()){
-                                    Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Log.e("Response errorBody", String.valueOf(response.code()));
+                int id_pegawai = sPSettings.getInt("id_pegawai",0);
+                if(id_pegawai==0){
+                    Toast.makeText(getApplicationContext(), "Harap Login Kembali", Toast.LENGTH_SHORT).show();
+                } else {
+                    BayarIuran service = Client.getClient().create(BayarIuran.class);
+                    service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,Integer.parseInt(periode_iuran.getText().toString()),id_iuran, id_pegawai)
+                            .enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if(response.isSuccessful()){
+                                        Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Toast.makeText(getApplicationContext(), "Gagal melakukan pembayaran", Toast.LENGTH_SHORT).show();
+                                        Log.e("Response errorBody", String.valueOf(response.code()));
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
 
-                            }
-                        });
+                                }
+                            });
+                }
             }
         });
     }

@@ -3,6 +3,7 @@ package com.devmptr.uasprogmob;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
     EditText username, password;
     LoginService service;
     Intent intent;
-
+    SharedPreferences sPSettings;
+    SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Berhasil Login",
                             Toast.LENGTH_SHORT).show();
                     Log.d("Response body", response.body().getSuccess().toString());
+                    sPSettings = getSharedPreferences("IuranAdmin", getApplicationContext().MODE_PRIVATE);
+                    editor = sPSettings.edit();
+                    editor.putInt("id_pegawai",response.body().getId_pegawai());
+                    editor.apply();
                     startActivity(intent);
                 }else{
                     Toast.makeText(getApplicationContext(), "Gagal Login",
