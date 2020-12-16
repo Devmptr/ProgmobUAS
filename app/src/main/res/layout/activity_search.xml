@@ -7,6 +7,15 @@
     android:padding="16dp"
     tools:context=".SearchActivity">
 
+    <Button
+        android:id="@+id/btn_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Logout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <EditText
         android:id="@+id/searchForm"
         android:layout_width="match_parent"
@@ -21,10 +30,11 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_lapak"
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        android:layout_marginTop="48dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/btn_logout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/searchForm" />
+        app:layout_constraintTop_toBottomOf="@+id/searchForm">
+
+    </androidx.recyclerview.widget.RecyclerView>
 </androidx.constraintlayout.widget.ConstraintLayout>

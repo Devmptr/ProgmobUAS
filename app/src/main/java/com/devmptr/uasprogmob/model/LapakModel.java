@@ -16,6 +16,12 @@ public class LapakModel {
     @Expose
     private String namaPemilik;
 
+    @SerializedName("posisi_lapak")
+    @Expose
+    private String posisiLapak;
+
+    public String getPosisiLapak() {return posisiLapak;}
+
     public String getNamaLapak() {
         return namaLapak;
     }

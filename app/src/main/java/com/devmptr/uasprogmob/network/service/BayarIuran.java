@@ -16,5 +16,6 @@ public interface BayarIuran {
                                   @Field("tanggal_bayar") String tanggal_bayar,
                                   @Field("tanggal_iuran") String tanggal_iuran,
                                   @Field("periode_iuran") int periode_iuran,
-                                  @Field("id_kategori_iuran") int id_kategori_iuran);
+                                  @Field("id_kategori_iuran") int id_kategori_iuran,
+                                  @Field("id_pegawai") int id_pegawai);
 }

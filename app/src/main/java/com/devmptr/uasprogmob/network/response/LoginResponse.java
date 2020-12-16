@@ -10,4 +10,11 @@ public class LoginResponse {
     public  String getSuccess(){
         return success;
     }
+
+    @SerializedName("id")
+    @Expose
+    private Integer id;
+    public Integer getId() {
+        return id;
+    }
 }

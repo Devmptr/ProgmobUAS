@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -49,10 +50,17 @@ public class PembayaranActivity extends AppCompatActivity {
     Button btn_submit;
     int id_lapak, id_iuran;
     String tanggal_bayar, formatted_tanggal_iuran;
+    SharedPreferences auth_sp;
+    Intent intent;
+    Integer user_id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pembayaran);
+
+        auth_sp = getApplicationContext().getSharedPreferences("authSP",
+                getApplicationContext().MODE_PRIVATE);
 
         spinner = (Spinner) findViewById(R.id.listJenisIuran);
         tanggal_iuran = findViewById(R.id.tanggalIuran);
@@ -82,12 +90,24 @@ public class PembayaranActivity extends AppCompatActivity {
         btn_submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!auth_sp.contains("log_id")){
+                    intent = new Intent(PembayaranActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }else{
+                    user_id = auth_sp.getInt("log_id", 0);
+                }
                 formatted_tanggal_iuran = format_iuran(tanggal_iuran.getText().toString());
                 BayarIuran service = Client.getClient().create(BayarIuran.class);
-                service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,Integer.parseInt(periode_iuran.getText().toString()),id_iuran)
+                service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,
+                        Integer.parseInt(periode_iuran.getText().toString()),id_iuran, user_id)
                         .enqueue(new Callback<ResponseBody>() {
                             @Override
                             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                Log.d("Call request", call.request().toString());
+                                Log.d("Call request header", call.request().headers().toString());
+                                Log.d("Response raw header", response.headers().toString());
+                                Log.d("Response raw", String.valueOf(response.raw().body()));
+                                Log.d("Response code", String.valueOf(response.code()));
                                 if(response.isSuccessful()){
                                     Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
                                 }else{

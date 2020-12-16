@@ -45,8 +45,8 @@ public class LapakAdapter extends RecyclerView.Adapter<LapakAdapter.ViewHolder> 
     public void onBindViewHolder(final LapakAdapter.ViewHolder holder, int position) {
         final LapakModel lapak = modelLapak.get(position);
 
-        holder.namaLapak.setText(lapak.getNamaLapak());
-        holder.namaPemilik.setText(lapak.getNamaPemilik());
+        holder.namaLapak.setText("Lapak "+lapak.getNamaLapak());
+        holder.namaPemilik.setText(lapak.getNamaPemilik()+" | Area "+lapak.getPosisiLapak());
 
         holder.btnBayar.setOnClickListener(new View.OnClickListener() {
             @Override

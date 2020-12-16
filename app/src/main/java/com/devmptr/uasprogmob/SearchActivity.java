@@ -4,10 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.devmptr.uasprogmob.adapter.LapakAdapter;
@@ -27,12 +31,14 @@ public class SearchActivity extends AppCompatActivity {
     LapakAdapter adapter;
     EditText search_form;
     String value = "";
+    Button btn_logout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
+        btn_logout = findViewById(R.id.btn_logout);
         search_form = (EditText) findViewById(R.id.searchForm);
         search_form.addTextChangedListener(new TextWatcher() {
             @Override
@@ -53,6 +59,13 @@ public class SearchActivity extends AppCompatActivity {
         });
 
         loadLapak("");
+
+        btn_logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                logout();
+            }
+        });
     }
 
     public void loadLapak(String val) {
@@ -81,6 +94,13 @@ public class SearchActivity extends AppCompatActivity {
         rvLapak = (RecyclerView) findViewById(R.id.list_lapak);
         rvLapak.setAdapter(adapter);
         rvLapak.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+    }
+
+    private void logout(){
+        SharedPreferences auth_sp;
+        auth_sp = getSharedPreferences("authSP", MODE_PRIVATE);
+        auth_sp.edit().clear().commit();
+        startActivity(new Intent(SearchActivity.this, MainActivity.class));
     }
 
 }
