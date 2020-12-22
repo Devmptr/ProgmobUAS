@@ -51,8 +51,6 @@ public class LapakAdapter extends RecyclerView.Adapter<LapakAdapter.ViewHolder> 
         holder.btnBayar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(view.getContext(), "Id = "+lapak.getId(),
-                        Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(context, PembayaranActivity.class).putExtra("lapak_id",lapak.getId());
                 context.startActivity(intent);
             }

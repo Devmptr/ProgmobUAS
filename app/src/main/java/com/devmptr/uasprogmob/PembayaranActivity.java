@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -43,16 +45,17 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class PembayaranActivity extends AppCompatActivity {
-    Spinner spinner;
-    EditText tanggal_iuran, periode_iuran;
+    Spinner spinner, periodeIuranSpinner;
+    EditText tanggal_iuran;
     List<String> listKategoriIuran;
     ArrayAdapter<String> adapter;
-    Button btn_submit;
+    Button btn_submit, iuran_date_picker;
     int id_lapak, id_iuran;
     String tanggal_bayar, formatted_tanggal_iuran;
     SharedPreferences auth_sp;
     Intent intent;
     Integer user_id;
+    DatePickerDialog datePickerDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,13 +67,15 @@ public class PembayaranActivity extends AppCompatActivity {
 
         spinner = (Spinner) findViewById(R.id.listJenisIuran);
         tanggal_iuran = findViewById(R.id.tanggalIuran);
-        periode_iuran = findViewById(R.id.periodeIuran);
+
         btn_submit = findViewById(R.id.btn_submit_pembayaran);
         receiveData();
         listKategoriIuran = new ArrayList<String>();
         getKategoriIuran();
         tanggal_bayar = datenow();
+        periodeIuranSpinner = findViewById(R.id.listPeriodePembayaran);
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, listKategoriIuran);
+        Log.d("priod",periodeIuranSpinner.getSelectedItem().toString());
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -97,31 +102,61 @@ public class PembayaranActivity extends AppCompatActivity {
                     user_id = auth_sp.getInt("log_id", 0);
                 }
                 formatted_tanggal_iuran = format_iuran(tanggal_iuran.getText().toString());
-                BayarIuran service = Client.getClient().create(BayarIuran.class);
-                service.bayarIuran(id_lapak, tanggal_bayar, formatted_tanggal_iuran,
-                        Integer.parseInt(periode_iuran.getText().toString()),id_iuran, user_id)
-                        .enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                Log.d("Call request", call.request().toString());
-                                Log.d("Call request header", call.request().headers().toString());
-                                Log.d("Response raw header", response.headers().toString());
-                                Log.d("Response raw", String.valueOf(response.raw().body()));
-                                Log.d("Response code", String.valueOf(response.code()));
-                                if(response.isSuccessful()){
-                                    Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
-                                }else{
-                                    Log.e("Response errorBody", String.valueOf(response.code()));
+                if(tanggal_iuran.getText().toString().matches("") || periodeIuranSpinner.getSelectedItem().equals("Periode Iuran")){
+                    Toast.makeText(getApplicationContext(),"Beberapa form tidak terisi!!", Toast.LENGTH_SHORT).show();
+                }else{
+                    BayarIuran service = Client.getClient().create(BayarIuran.class);
+                    service.bayarIuran(id_lapak, tanggal_bayar, tanggal_iuran.getText().toString(), Integer.parseInt(periodeIuranSpinner.getSelectedItem().toString()),id_iuran, user_id)
+                            .enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    Log.d("Call request", call.request().toString());
+                                    Log.d("Call request header", call.request().headers().toString());
+                                    Log.d("Response raw header", response.headers().toString());
+                                    Log.d("Response raw", String.valueOf(response.raw().body()));
+                                    Log.d("Response code", String.valueOf(response.code()));
+                                    if(response.isSuccessful()){
+                                        Toast.makeText(getApplicationContext(), "sukses", Toast.LENGTH_SHORT).show();
+                                    }else{
+                                        Log.e("Response errorBody", String.valueOf(response.code()));
+                                    }
                                 }
-                            }
 
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
 
-                            }
-                        });
+                                }
+                            });
+                }
             }
         });
+
+        iuran_date_picker = findViewById(R.id.pickDateIuran);
+        iuran_date_picker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IuranDatePicker();
+            }
+        });
+    }
+
+    private void IuranDatePicker() {
+        Calendar newCalendar = Calendar.getInstance();
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault());
+
+        datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+
+                Calendar newDate = Calendar.getInstance();
+                newDate.set(year, monthOfYear, dayOfMonth);
+                tanggal_iuran.setText(df.format(newDate.getTime()));
+
+            }
+
+        },newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
+
+        datePickerDialog.show();
     }
 
     private String format_iuran(String tanggal) {
@@ -149,8 +184,9 @@ public class PembayaranActivity extends AppCompatActivity {
 
     private String datenow() {
         Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault());
         String formattedDate = df.format(c);
+        Log.d("time",formattedDate);
         return formattedDate;
     }
 
@@ -163,7 +199,6 @@ public class PembayaranActivity extends AppCompatActivity {
                     try {
                         JSONObject jsonRESULTS = new JSONObject(response.body().string());
                         id_iuran = jsonRESULTS.getInt("id_kategori_iuran");
-                        Toast.makeText(getApplicationContext(), "id iuran adalah "+id_iuran, Toast.LENGTH_SHORT).show();
                     } catch (JSONException e){
                         e.printStackTrace();
                     } catch (IOException e){

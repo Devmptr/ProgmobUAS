@@ -56,15 +56,15 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences auth_sp = getApplicationContext().getSharedPreferences("authSP",
                             getApplicationContext().MODE_PRIVATE);
                     SharedPreferences.Editor editor = auth_sp.edit();
-                    Integer user_id = response.body().getId();
+                    int user_id = response.body().getId();
                     editor.putInt("log_id", user_id);
                     editor.apply();
-
                     startActivity(intent);
+
                 }else{
                     Toast.makeText(getApplicationContext(), "Gagal Login",
                             Toast.LENGTH_SHORT).show();
-                    Log.e("Error body", response.errorBody().toString());
+                    Log.e("Error body", String.valueOf(response.errorBody()));
                 }
             }
 
