@@ -31,7 +31,7 @@ public class SearchActivity extends AppCompatActivity {
     LapakAdapter adapter;
     EditText search_form;
     String value = "";
-    Button btn_logout;
+    Button btn_logout,btn_about;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,7 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         btn_logout = findViewById(R.id.btn_logout);
+        btn_about = findViewById(R.id.btn_about);
         search_form = (EditText) findViewById(R.id.searchForm);
         search_form.addTextChangedListener(new TextWatcher() {
             @Override
@@ -64,6 +65,14 @@ public class SearchActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 logout();
+            }
+        });
+
+        btn_about.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SearchActivity.this, Profile.class);
+                startActivity(intent);
             }
         });
     }

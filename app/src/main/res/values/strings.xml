@@ -9,7 +9,9 @@
 
     <string name="pilih_jenis">Pilih Jenis</string>
     <string name="jenis_iuran">Jenis Iuran</string>
-
+    <string name="prodi">Program Studi Teknologi Informasi</string>
+    <string name="fakultas">Fakultas Teknik</string>
+    <string name="universitas">Universitas Udayana</string>
     <string-array name="list_jenis_iuran">
         <item>Iuran Air</item>
         <item>Iuran Sampah</item>
